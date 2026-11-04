@@ -3,3 +3,46 @@ Copyright 2026 ABCodeLabs (https://abco.dev)
 
 This product includes software developed by ABCodeLabs (https://abco.dev).
 Original repository: https://github.com/ABCodeLabs/agy-webchanel
+
+========================================================================
+Third-Party Open Source Software Notices & Attribution
+========================================================================
+
+Standalone distributions of agy-webchanel bundle the following open-source
+libraries. We gratefully acknowledge their authors and maintainers:
+
+1. Typer (https://github.com/fastapi/typer)
+   - Author: Sebastián Ramírez (tiangolo)
+   - License: MIT License
+
+2. Rich (https://github.com/Textualize/rich)
+   - Author: Will McGugan / Textualize
+   - License: MIT License
+
+3. python-pathspec (https://github.com/cpburnz/python-pathspec)
+   - Author: Caleb P. Burns
+   - License: Mozilla Public License 2.0 (MPL-2.0)
+
+4. Google API Python Client (https://github.com/googleapis/google-api-python-client)
+   - Author: Google LLC
+   - License: Apache License 2.0
+
+5. Google Auth Python Library (https://github.com/googleapis/google-auth-library-python)
+   - Author: Google Cloud Platform / Google LLC
+   - License: Apache License 2.0
+
+6. Google Auth OAuthlib (https://github.com/googleapis/google-auth-library-python-oauthlib)
+   - Author: Google Cloud Platform / Google LLC
+   - License: Apache License 2.0
+
+7. Google Auth httplib2 (https://github.com/googleapis/google-auth-library-python-httplib2)
+   - Author: Google Cloud Platform / Google LLC
+   - License: Apache License 2.0
+
+8. Requests (https://github.com/psf/requests) & urllib3 (https://github.com/urllib3/urllib3)
+   - Authors: Kenneth Reitz / Python Software Foundation, Andrey Petrov
+   - Licenses: Apache License 2.0 / MIT License
+
+9. Cryptography (https://github.com/pyca/cryptography)
+   - Author: Python Cryptographic Authority (PyCA)
+   - License: Apache License 2.0 / BSD-3-Clause

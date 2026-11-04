@@ -1,0 +1,128 @@
+name: Release Standalone Binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.artifact_name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: agywc-linux-x86_64
+            binary_name: agywc
+            archive_ext: tar.gz
+          - os: macos-latest
+            artifact_name: agywc-macos-arm64
+            binary_name: agywc
+            archive_ext: tar.gz
+          - os: windows-latest
+            artifact_name: agywc-windows-x64
+            binary_name: agywc.exe
+            archive_ext: zip
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Linux system dependencies (patchelf)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y patchelf ccache
+
+      - name: Install package and build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]" zstandard ordered-set
+
+      - name: Generate THIRD_PARTY_LICENSES.txt
+        run: |
+          mkdir -p dist
+          python -m piplicenses \
+            --format=plain-vertical \
+            --with-authors \
+            --with-urls \
+            --with-license-file \
+            --no-license-path \
+            --output-file=dist/THIRD_PARTY_LICENSES.txt
+
+      - name: Compile standalone binary with Nuitka
+        run: |
+          python -m nuitka \
+            --standalone \
+            --onefile \
+            --assume-yes-for-downloads \
+            --include-package=agy_webchanel \
+            --include-package-data=googleapiclient \
+            --include-package-data=google.auth \
+            --output-dir=dist \
+            --output-filename=${{ matrix.binary_name }} \
+            src/agy_webchanel/cli.py
+
+      - name: Smoke-test compiled binary
+        run: |
+          ./dist/${{ matrix.binary_name }} --help
+          ./dist/${{ matrix.binary_name }} credits
+
+      - name: Package release archive (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p dist/pkg
+          cp dist/${{ matrix.binary_name }} LICENSE NOTICE dist/THIRD_PARTY_LICENSES.txt dist/pkg/
+          chmod +x dist/pkg/${{ matrix.binary_name }}
+          tar -czf dist/${{ matrix.artifact_name }}.tar.gz -C dist/pkg .
+
+      - name: Package release archive (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist/pkg | Out-Null
+          Copy-Item dist/${{ matrix.binary_name }}, LICENSE, NOTICE, dist/THIRD_PARTY_LICENSES.txt -Destination dist/pkg/
+          Compress-Archive -Path dist/pkg/* -DestinationPath dist/${{ matrix.artifact_name }}.zip -Force
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/${{ matrix.artifact_name }}.${{ matrix.archive_ext }}
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Generate SHA256SUMS
+        working-directory: release-assets
+        run: |
+          sha256sum agywc-* > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            release-assets/*

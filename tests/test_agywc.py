@@ -111,3 +111,17 @@ def test_normalize_remote_msg_filename() -> None:
         == "msg-20261104-152030.md"
     )
 
+
+def test_cli_credits_command() -> None:
+    from typer.testing import CliRunner
+    from agy_webchanel.cli import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["credits"])
+    assert result.exit_code == 0
+    assert "ABCodeLabs" in result.stdout
+    assert "Apache License, Version 2.0" in result.stdout
+    assert "Typer" in result.stdout
+    assert "Rich" in result.stdout
+
+

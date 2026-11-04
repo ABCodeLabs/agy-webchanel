@@ -28,6 +28,14 @@ agy-webchanel/                        # Root folder in Google Drive (multi-repos
 
 ## Installation
 
+### Quick Install (Standalone Binary — Linux & macOS)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ABCodeLabs/agy-webchanel/main/install.sh | bash
+```
+
+### From Source (Python 3.10+)
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -52,6 +60,19 @@ This installs the **`agywc`** (short alias) and **`agy-webchanel`** CLI executab
 | `agywc ack [all \| msg-<ts>.md]` | Mark messages as read by moving them to `archived/` both locally and in Google Drive. |
 | `agywc sync` | Run the full cycle (`pack` + `pull` + `push`). |
 | `agywc status` | Show local status, message queues, and direct Google Drive links. |
+| `agywc credits` | Display project authorship, license information, and third-party open-source credits. |
+
+---
+
+## Standalone Compilation (Nuitka)
+
+To build a standalone single-file binary locally along with `THIRD_PARTY_LICENSES.txt`:
+
+```bash
+./scripts/build_standalone.sh
+```
+
+Multi-platform release binaries (`Linux x86_64`, `macOS arm64`, `Windows x64`) are automatically compiled and published via GitHub Actions ([`.github/workflows/release.yml`](.github/workflows/release.yml)) whenever a version tag (`v*`) is pushed.
 
 ---
 

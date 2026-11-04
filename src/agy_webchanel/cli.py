@@ -431,6 +431,64 @@ def cmd_status(
     console.print(table)
 
 
+THIRD_PARTY_CREDITS = [
+    ("Typer", "Sebastián Ramírez (tiangolo)", "MIT License", "https://github.com/fastapi/typer"),
+    ("Rich", "Will McGugan / Textualize", "MIT License", "https://github.com/Textualize/rich"),
+    ("python-pathspec", "Caleb P. Burns", "MPL-2.0", "https://github.com/cpburnz/python-pathspec"),
+    (
+        "google-api-python-client",
+        "Google LLC",
+        "Apache-2.0",
+        "https://github.com/googleapis/google-api-python-client",
+    ),
+    (
+        "google-auth",
+        "Google Cloud Platform / Google LLC",
+        "Apache-2.0",
+        "https://github.com/googleapis/google-auth-library-python",
+    ),
+    (
+        "google-auth-oauthlib",
+        "Google Cloud Platform / Google LLC",
+        "Apache-2.0",
+        "https://github.com/googleapis/google-auth-library-python-oauthlib",
+    ),
+    (
+        "google-auth-httplib2",
+        "Google Cloud Platform / Google LLC",
+        "Apache-2.0",
+        "https://github.com/googleapis/google-auth-library-python-httplib2",
+    ),
+    ("Requests & urllib3", "PSF / Kenneth Reitz / Andrey Petrov", "Apache-2.0 / MIT", "https://github.com/psf/requests"),
+    ("Cryptography", "PyCA", "Apache-2.0 / BSD-3-Clause", "https://github.com/pyca/cryptography"),
+]
+
+
+@app.command("credits")
+def cmd_credits() -> None:
+    """Display project authorship, license information, and third-party open-source credits."""
+    console.print(
+        Panel.fit(
+            "[bold cyan]agy-webchanel (`agywc`)[/bold cyan]\n"
+            "Copyright © 2026 [bold]ABCodeLabs[/bold] (https://abco.dev)\n"
+            "Licensed under the [green]Apache License, Version 2.0[/green]\n"
+            "Repository: https://github.com/ABCodeLabs/agy-webchanel",
+            title="Project Attribution",
+        )
+    )
+
+    table = Table(title="Third-Party Open Source Libraries & Acknowledgements")
+    table.add_column("Library", style="bold cyan")
+    table.add_column("Author / Maintainer")
+    table.add_column("License", style="green")
+    table.add_column("URL", style="dim")
+
+    for lib, author, lic, url in THIRD_PARTY_CREDITS:
+        table.add_row(lib, author, lic, url)
+
+    console.print(table)
+
+
 if __name__ == "__main__":
     app()
 
