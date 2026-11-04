@@ -52,3 +52,12 @@ Isso disponibiliza os executáveis **`agywc`** (atalho) e **`agy-webchanel`**.
 | `agywc ack [all \| msg-<ts>.md]` | Descarta/arquiva mensagens lidas movendo-as para `archived/` tanto localmente quanto no Google Drive. |
 | `agywc sync` | Executa o ciclo completo (`pack` + `pull` + `push`). |
 | `agywc status` | Exibe o status local e links diretos das pastas/arquivos no Google Drive. |
+
+---
+
+## Licença e Créditos
+
+Distribuído sob a licença **Apache License 2.0** — veja [LICENSE](LICENSE) e [NOTICE](NOTICE) para mais detalhes.
+
+Desenvolvido por **[ABCodeLabs](https://abco.dev)** (`https://github.com/ABCodeLabs/agy-webchanel`).
+

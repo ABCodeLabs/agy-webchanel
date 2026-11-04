@@ -8,9 +8,9 @@ version = "0.1.0"
 description = "Canal bidirecional de contexto e mensagens entre o Agente Local (AGY) e o Gemini Web via Google Drive (.agywc)"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = { text = "Apache-2.0" }
 authors = [
-    { name = "ABCodeLabs", email = "dev@abcodelabs.com" }
+    { name = "ABCodeLabs", email = "dev@abco.dev" }
 ]
 dependencies = [
     "typer>=0.9.0",
@@ -26,6 +26,10 @@ dependencies = [
 dev = [
     "pytest>=7.4.0",
 ]
+
+[project.urls]
+Homepage = "https://abco.dev"
+Repository = "https://github.com/ABCodeLabs/agy-webchanel"
 
 [project.scripts]
 agywc = "agy_webchanel.cli:app"
