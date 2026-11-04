@@ -34,8 +34,13 @@ class GDriveAuthError(RuntimeError):
 def authenticate_oauth(
     credentials_file: Optional[Path] = None,
     headless: bool = False,
+    auth_code: Optional[str] = None,
+    print_url_only: bool = False,
+    port: int = 8085,
 ) -> Path:
-    """Realiza o fluxo OAuth2 e salva token.json no diretório global."""
+    """Realiza o fluxo OAuth2 escutando na porta local (8085) e aceitando também URL/código colado."""
+    import http.server
+    import threading
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
     from google_auth_oauthlib.flow import InstalledAppFlow
@@ -57,27 +62,28 @@ def authenticate_oauth(
         )
 
     creds = None
-    if token_path.exists():
+    if token_path.exists() and not auth_code and not print_url_only:
         try:
             creds = Credentials.from_authorized_user_file(str(token_path), SCOPES)
         except Exception:
             creds = None
 
     if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
+        if creds and creds.expired and creds.refresh_token and not auth_code and not print_url_only:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(str(cred_path), SCOPES)
-            if headless:
-                flow.redirect_uri = "http://localhost:8085/"
+            flow = InstalledAppFlow.from_client_secrets_file(
+                str(cred_path), SCOPES, autogenerate_code_verifier=False
+            )
+            flow.redirect_uri = f"http://localhost:{port}/"
+
+            if print_url_only:
                 auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
-                print("\nAbra a URL abaixo no seu navegador para autorizar o Google Drive:\n")
-                print(f"  {auth_url}\n")
-                print(
-                    "Após autorizar, se o navegador redirecionar para localhost:8085 e não carregar,\n"
-                    "copie a URL completa da barra de endereços (ou apenas o parâmetro `code=`) e cole abaixo:"
-                )
-                raw = input("URL ou código de autorização: ").strip()
+                print(auth_url)
+                return cred_path
+
+            if auth_code:
+                raw = auth_code.strip()
                 if raw.startswith("http://") or raw.startswith("https://"):
                     parsed = urlparse(raw)
                     qs = parse_qs(parsed.query)
@@ -89,7 +95,81 @@ def authenticate_oauth(
                 flow.fetch_token(code=code)
                 creds = flow.credentials
             else:
-                creds = flow.run_local_server(port=8085, open_browser=True)
+                captured_code: list[str] = []
+                done_event = threading.Event()
+
+                class _CallbackHandler(http.server.BaseHTTPRequestHandler):
+                    def do_GET(self) -> None:
+                        parsed = urlparse(self.path)
+                        qs = parse_qs(parsed.query)
+                        code_val = (qs.get("code") or [""])[0]
+                        if code_val:
+                            captured_code.append(code_val)
+                            body = (
+                                "<html><head><meta charset='utf-8'><title>agy-webchanel</title></head>"
+                                "<body style='font-family:sans-serif;text-align:center;padding:40px;'>"
+                                "<h2>✓ Autenticação concluída com sucesso!</h2>"
+                                "<p>O token foi salvo no <code>agy-webchanel</code>. Você já pode fechar esta aba.</p>"
+                                "</body></html>"
+                            ).encode("utf-8")
+                            self.send_response(200)
+                            self.send_header("Content-Type", "text/html; charset=utf-8")
+                            self.send_header("Content-Length", str(len(body)))
+                            self.end_headers()
+                            self.wfile.write(body)
+                            done_event.set()
+                        else:
+                            self.send_response(400)
+                            self.end_headers()
+
+                    def log_message(self, format: str, *args) -> None:
+                        pass
+
+                server = None
+                try:
+                    http.server.HTTPServer.allow_reuse_address = True
+                    server = http.server.HTTPServer(("0.0.0.0", port), _CallbackHandler)
+                    srv_thread = threading.Thread(target=server.serve_forever, daemon=True)
+                    srv_thread.start()
+                except OSError:
+                    server = None
+
+                auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
+                print("\n1. Abra a URL abaixo no seu navegador para autorizar o Google Drive:\n")
+                print(f"  {auth_url}\n")
+                print(
+                    f"2. Aguardando retorno automático em http://localhost:{port}/ ...\n"
+                    "   (Ou, se o navegador não conectar à porta local, copie a URL da barra de endereços com `?code=...` e cole aqui no terminal):"
+                )
+
+                def _stdin_reader() -> None:
+                    try:
+                        line = input().strip()
+                        if line and not done_event.is_set():
+                            if line.startswith("http://") or line.startswith("https://"):
+                                parsed = urlparse(line)
+                                qs = parse_qs(parsed.query)
+                                c = (qs.get("code") or [""])[0]
+                            else:
+                                c = line
+                            if c:
+                                captured_code.append(c)
+                                done_event.set()
+                    except EOFError:
+                        pass
+
+                in_thread = threading.Thread(target=_stdin_reader, daemon=True)
+                in_thread.start()
+
+                done_event.wait()
+                if server:
+                    server.shutdown()
+                    server.server_close()
+
+                if not captured_code:
+                    raise GDriveAuthError("Nenhum código de autorização recebido.")
+                flow.fetch_token(code=captured_code[0])
+                creds = flow.credentials
 
         token_path.write_text(creds.to_json(), encoding="utf-8")
 

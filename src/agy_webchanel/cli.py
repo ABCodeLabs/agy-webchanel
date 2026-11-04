@@ -61,6 +61,16 @@ def cmd_auth(
         "-s",
         help="Caminho para um arquivo JSON de Service Account do Google Cloud.",
     ),
+    code: Optional[str] = typer.Option(
+        None,
+        "--code",
+        help="Código ou URL de redirecionamento OAuth (para autenticação não-interativa).",
+    ),
+    print_url: bool = typer.Option(
+        False,
+        "--print-url",
+        help="Apenas salva o credentials.json (se informado) e imprime a URL de autorização OAuth.",
+    ),
     headless: bool = typer.Option(
         True,
         "--headless/--browser",
@@ -79,8 +89,14 @@ def cmd_auth(
         return
 
     try:
-        token_path = authenticate_oauth(credentials_file=credentials, headless=headless)
-        console.print(f"[green]✓ Autenticação OAuth concluída! Token salvo em:[/green] {token_path}")
+        token_path = authenticate_oauth(
+            credentials_file=credentials,
+            headless=headless,
+            auth_code=code,
+            print_url_only=print_url,
+        )
+        if not print_url:
+            console.print(f"[green]✓ Autenticação OAuth concluída! Token salvo em:[/green] {token_path}")
     except GDriveAuthError as exc:
         console.print(f"[red]Erro de autenticação:[/red] {exc}")
         raise typer.Exit(code=1)

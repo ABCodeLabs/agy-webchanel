@@ -1,6 +1,7 @@
 # Documentação interna e canal web (não versionados)
 internal-docs/
 .agywc/
+.secret/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -37,3 +38,5 @@ client_secrets.json
 .idea/
 .DS_Store
 
+# Secretos e chaves privadas
+.secret/
