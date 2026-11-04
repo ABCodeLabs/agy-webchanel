@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "agy-webchanel"
 version = "0.1.0"
-description = "Canal bidirecional de contexto e mensagens entre o Agente Local (AGY) e o Gemini Web via Google Drive (.agywc)"
+description = "Bidirectional context and message channel between Local Agent (AGY) and Gemini Web via Google Drive (.agywc)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }

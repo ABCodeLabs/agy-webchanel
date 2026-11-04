@@ -1,32 +1,32 @@
 # agy-webchanel (`agywc`)
 
-CLI em Python que estabelece um **canal bidirecional de contexto e mensagens** entre o **Agente Local (AGY)** e o **Gemini Web** usando o Google Drive como camada de transporte assíncrona.
+A Python CLI that establishes an **asynchronous, bidirectional context and message channel** between a **Local Agent (Antigravity / AGY)** and **Gemini Web** using Google Drive as a transport layer.
 
 ---
 
-## Arquitetura de Diretórios (`.agywc`)
+## Directory Architecture (`.agywc`)
 
-Tanto no repositório local (em `.agywc/`, ignorado pelo Git) quanto no Google Drive (em `agy-webchanel/<nome-do-repo>/.agywc/`), a estrutura segue o mesmo contrato:
+Both in the local repository (`.agywc/`, gitignored) and in Google Drive (`agy-webchanel/<repo-name>/.agywc/`), the structure follows the exact same contract:
 
 ```text
-agy-webchanel/                        # Pasta raiz no Google Drive (multi-repositório)
-└── <nome-do-repo>/
-    └── .agywc/                       # Espelhado localmente em <repo>/.agywc/
-        ├── AGENTS.md                 # Manual de protocolo e disciplina de leitura/descarte
-        ├── repo-compressed/          # Fonte da verdade (Corpus consolidado do repositório)
-        │   ├── repo-context.md       # Árvore de diretórios + código-fonte em arquivo único
-        │   └── repo-context          # (Opcional) Cópia em Google Doc nativo para o Gemini Web
-        ├── chat-local/               # Mensagens do Agente Local -> para o Gemini Web
-        │   ├── msg-<timestamp>.md    # Mensagens ativas (não lidas)
-        │   └── archived/             # Mensagens já lidas/processadas
-        └── chat-remote/              # Mensagens do Gemini Web -> para o Agente Local
-            ├── msg-<timestamp>.md    # Mensagens ativas (não lidas)
-            └── archived/             # Mensagens já aplicadas pelo Agente Local
+agy-webchanel/                        # Root folder in Google Drive (multi-repository)
+└── <repo-name>/
+    └── .agywc/                       # Mirrored locally at <repo>/.agywc/
+        ├── AGENTS.md                 # Inter-agent protocol & read/discard discipline
+        ├── repo-compressed/          # Single Source of Truth (Consolidated repository corpus)
+        │   ├── repo-context.md       # Directory tree + full source code in a single file
+        │   └── repo-context          # (Optional) Native Google Doc copy for Gemini Web
+        ├── chat-local/               # Outbox from Local Agent -> Inbox for Gemini Web
+        │   ├── msg-<timestamp>.md    # Active (unread) messages
+        │   └── archived/             # Processed/archived messages
+        └── chat-remote/              # Outbox from Gemini Web -> Inbox for Local Agent
+            ├── msg-<timestamp>.md    # Active (unread) messages
+            └── archived/             # Processed/archived messages
 ```
 
 ---
 
-## Instalação
+## Installation
 
 ```bash
 python3 -m venv .venv
@@ -34,30 +34,29 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-Isso disponibiliza os executáveis **`agywc`** (atalho) e **`agy-webchanel`**.
+This installs the **`agywc`** (short alias) and **`agy-webchanel`** CLI executables.
 
 ---
 
-## Comandos Principais
+## CLI Commands
 
-| Comando | Descrição |
+| Command | Description |
 | :--- | :--- |
-| `agywc auth -c credentials.json` | Autentica via OAuth2 com o Google Drive (ou `--service-account`). |
-| `agywc init` | Inicializa `.agywc/` (`AGENTS.md`, `repo-compressed/`, `chat-local/archived/`, `chat-remote/archived/`) no repositório atual. |
-| `agywc pack` | Comprime/consolida o repositório local em `.agywc/repo-compressed/repo-context.md`. |
-| `agywc send "mensagem" [-p]` | Cria um arquivo `.agywc/chat-local/msg-<YYYYMMDD-HHMMSS>.md` (e envia ao Drive se usar `-p`). |
-| `agywc push` | Atualiza `AGENTS.md`, `repo-compressed/` e envia mensagens ativas de `chat-local/` para o Google Drive. |
-| `agywc pull` | Baixa mensagens ativas de `chat-remote/` do Google Drive (convertendo Google Docs para `.md` se necessário) e arquiva mensagens de `chat-local/` já respondidas. |
-| `agywc inbox [--ack]` | Exibe no terminal as mensagens pendentes em `.agywc/chat-remote/` (e opcionalmente já as arquiva com `--ack`). |
-| `agywc ack [all \| msg-<ts>.md]` | Descarta/arquiva mensagens lidas movendo-as para `archived/` tanto localmente quanto no Google Drive. |
-| `agywc sync` | Executa o ciclo completo (`pack` + `pull` + `push`). |
-| `agywc status` | Exibe o status local e links diretos das pastas/arquivos no Google Drive. |
+| `agywc auth -c credentials.json` | Authenticate with Google Drive via OAuth2 (or `--service-account`). |
+| `agywc init` | Initialize `.agywc/` (`AGENTS.md`, `repo-compressed/`, `chat-local/archived/`, `chat-remote/archived/`) in the current repository. |
+| `agywc pack` | Consolidate the local repository into `.agywc/repo-compressed/repo-context.md`. |
+| `agywc send "message" [-p]` | Create a new `.agywc/chat-local/msg-<YYYYMMDD-HHMMSS>.md` message (and push to Drive if `-p` is passed). |
+| `agywc push` | Update `AGENTS.md`, `repo-compressed/`, and upload active `chat-local/` messages to Google Drive. |
+| `agywc pull` | Download active `chat-remote/` messages from Google Drive (automatically exporting native Google Docs to `.md`) and auto-archive replied `chat-local/` messages. |
+| `agywc inbox [--ack]` | Display unread messages in `.agywc/chat-remote/` (and optionally archive them immediately with `--ack`). |
+| `agywc ack [all \| msg-<ts>.md]` | Mark messages as read by moving them to `archived/` both locally and in Google Drive. |
+| `agywc sync` | Run the full cycle (`pack` + `pull` + `push`). |
+| `agywc status` | Show local status, message queues, and direct Google Drive links. |
 
 ---
 
-## Licença e Créditos
+## License & Credits
 
-Distribuído sob a licença **Apache License 2.0** — veja [LICENSE](LICENSE) e [NOTICE](NOTICE) para mais detalhes.
+Distributed under the **Apache License 2.0** — see [LICENSE](LICENSE) and [NOTICE](NOTICE) for details.
 
-Desenvolvido por **[ABCodeLabs](https://abco.dev)** (`https://github.com/ABCodeLabs/agy-webchanel`).
-
+Developed by **[ABCodeLabs](https://abco.dev)** (`https://github.com/ABCodeLabs/agy-webchanel`).
