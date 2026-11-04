@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agy-webchanel"
+version = "0.1.0"
+description = "Canal bidirecional de contexto e mensagens entre o Agente Local (AGY) e o Gemini Web via Google Drive (.agywc)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "ABCodeLabs", email = "dev@abcodelabs.com" }
+]
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "pathspec>=0.11.0",
+    "google-api-python-client>=2.100.0",
+    "google-auth>=2.23.0",
+    "google-auth-oauthlib>=1.1.0",
+    "google-auth-httplib2>=0.1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+]
+
+[project.scripts]
+agywc = "agy_webchanel.cli:app"
+agy-webchanel = "agy_webchanel.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
