@@ -1,0 +1,37 @@
+# Documentação interna (não versionada)
+internal-docs/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Credenciais e variáveis de ambiente
+.env
+*.json
+!pyproject.toml
+credentials.json
+token.json
+client_secrets.json
+
+# Arquivos compactados gerados localmente
+*.zip
+*.tar.gz
+*.tgz
+
+# IDEs / OS
+.vscode/
+.idea/
+.DS_Store
