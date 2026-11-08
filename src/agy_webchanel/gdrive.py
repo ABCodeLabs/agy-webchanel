@@ -278,7 +278,7 @@ class GDriveClient:
     def ensure_remote_hierarchy(self, state: WorkspaceState) -> WorkspaceState:
         """
         Garante a árvore completa no Google Drive:
-        agy-webchanel/
+        agy-webchanel/ (em 'root')
           └── <repo_name>/
                 └── .agywc/
                       ├── repo-compressed/
@@ -288,7 +288,9 @@ class GDriveClient:
                             └── archived/
         """
         f = state.folders
-        f.root_id = self.ensure_folder(DRIVE_ROOT_FOLDER_NAME, parent_id=None, cached_id=f.root_id)
+        f.root_id = self.ensure_folder(
+            DRIVE_ROOT_FOLDER_NAME, parent_id="root", cached_id=f.root_id
+        )
         f.repo_id = self.ensure_folder(state.repo_name, parent_id=f.root_id, cached_id=f.repo_id)
         f.agywc_id = self.ensure_folder(AGYWC_DIR_NAME, parent_id=f.repo_id, cached_id=f.agywc_id)
         f.repo_compressed_id = self.ensure_folder(

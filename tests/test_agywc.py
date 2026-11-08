@@ -125,3 +125,26 @@ def test_cli_credits_command() -> None:
     assert "Rich" in result.stdout
 
 
+def test_ensure_remote_hierarchy_restricts_root_folder_to_drive_root() -> None:
+    from unittest.mock import MagicMock
+    from agy_webchanel.config import DRIVE_ROOT_FOLDER_NAME, WorkspaceState
+    from agy_webchanel.gdrive import GDriveClient
+
+    client = GDriveClient(service=MagicMock())
+    calls: list[tuple[str, str | None, str | None]] = []
+
+    def fake_ensure_folder(
+        name: str, parent_id: str | None = None, cached_id: str | None = None
+    ) -> str:
+        calls.append((name, parent_id, cached_id))
+        return f"id-{name}-{parent_id}"
+
+    client.ensure_folder = fake_ensure_folder  # type: ignore[method-assign]
+    state = WorkspaceState(repo_name="bizarbc")
+    client.ensure_remote_hierarchy(state)
+
+    assert calls[0] == (DRIVE_ROOT_FOLDER_NAME, "root", None)
+    assert calls[1] == ("bizarbc", f"id-{DRIVE_ROOT_FOLDER_NAME}-root", None)
+
+
+
