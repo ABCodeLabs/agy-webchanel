@@ -4,6 +4,56 @@ A Python CLI that establishes an **asynchronous, bidirectional context and messa
 
 ---
 
+## 🤖 Quick Setup Guide for AI Agents (One-Liner)
+
+If a human user asks you (**an AI coding agent**) to *"install and configure `agy-webchanel` (`agywc`) in this repository"*, execute the following steps directly in the target repository:
+
+### Step 1: Install the `agywc` executable globally
+Run the official one-liner installer (it automatically installs the standalone binary from GitHub Releases or sets up an isolated environment in `~/.local/bin/agywc`):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ABCodeLabs/agy-webchanel/main/install.sh | bash
+export PATH="$HOME/.local/bin:$PATH"
+agywc --help
+```
+
+### Step 2: Initialize `.agywc/` in the target repository
+Inside the root of the repository you want to connect:
+
+```bash
+agywc init
+agywc pack
+```
+This creates `.agywc/` (`AGENTS.md`, `repo-compressed/repo-context.md`, `chat-local/archived/`, `chat-remote/archived/`) and ensures `.agywc/` is added to `.gitignore`.
+
+### Step 3: Authenticate with Google Drive (once per machine/container)
+Check if Google Drive credentials are already active:
+
+```bash
+agywc status
+```
+- If `Autenticação Drive` shows **Autenticado**, proceed straight to **Step 4**.
+- If not authenticated yet:
+  - Ask the user for the path to their OAuth Desktop Client JSON (`credentials.json`) or Service Account JSON.
+  - Run:
+    ```bash
+    # For OAuth2 Desktop Client (starts local listener on port 8085 and prints auth URL):
+    agywc auth -c /path/to/credentials.json
+
+    # Or for Service Account:
+    agywc auth --service-account /path/to/service_account.json
+    ```
+
+### Step 4: Sync with Google Drive & Read the Protocol
+Once authenticated, push the repository corpus and `.agywc/AGENTS.md` to Google Drive:
+
+```bash
+agywc push
+```
+Then read `.agywc/AGENTS.md` to follow the message-passing and archiving discipline (`agywc send "..." --push`, `agywc pull`, `agywc inbox --ack`).
+
+---
+
 ## Directory Architecture (`.agywc`)
 
 Both in the local repository (`.agywc/`, gitignored) and in Google Drive (`agy-webchanel/<repo-name>/.agywc/`), the structure follows the exact same contract:
@@ -26,15 +76,15 @@ agy-webchanel/                        # Root folder in Google Drive (multi-repos
 
 ---
 
-## Installation
+## Manual / Developer Installation
 
-### Quick Install (Standalone Binary — Linux & macOS)
+### Quick Install (Standalone Binary / Auto-Venv — Linux & macOS)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ABCodeLabs/agy-webchanel/main/install.sh | bash
 ```
 
-### From Source (Python 3.10+)
+### From Source (Development)
 
 ```bash
 python3 -m venv .venv
